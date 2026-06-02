@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -58,9 +59,7 @@ app.use(errorHandler);
 
 // 🔹 Database Connection + Server Start
 
-mongoose.connect(
-  "mongodb+srv://del27015radha_db_user:CrowdGuard123@cluster0.yxq8gf9.mongodb.net/crowdguard?retryWrites=true&w=majority&appName=Cluster0"
-)
+mongoose.connect(process.env.MONGO_URI)
 
 
 
