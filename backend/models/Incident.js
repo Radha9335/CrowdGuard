@@ -21,6 +21,14 @@ const incidentSchema = new mongoose.Schema(
     },
 
 
+
+
+    status: {
+  type: String,
+  enum: ["Pending", "Verified", "Resolved"],
+  default: "Pending",
+},
+
     image: {
   type: String,
   default: "",

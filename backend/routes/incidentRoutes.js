@@ -7,10 +7,11 @@ const router = express.Router();
 console.log("INCIDENT ROUTES LOADED");
 
 const {
-    createIncident,
-    getIncidents,
-    deleteIncident,
-    updateIncident
+  createIncident,
+  getIncidents,
+  deleteIncident,
+  updateIncident,
+  updateIncidentStatus,
 } = require("../controllers/incidentController");
 
 // Create
@@ -29,5 +30,7 @@ router.delete("/:id", protect, deleteIncident);
 
 // Update
 router.put("/:id", updateIncident);
+
+router.put("/:id/status", updateIncidentStatus);
 
 module.exports = router;

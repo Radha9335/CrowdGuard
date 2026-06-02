@@ -90,7 +90,9 @@ exports.updateIncident = async (req, res, next) => {
     const updated = await Incident.findByIdAndUpdate(
       req.params.id,
       req.body,
-      { new: true }
+      {
+  returnDocument: "after",
+}
     );
 
     if (!updated) {
@@ -100,6 +102,36 @@ exports.updateIncident = async (req, res, next) => {
 
     res.status(200).json(updated);
 
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+// 🔹 Update Incident Status
+exports.updateIncidentStatus = async (req, res, next) => {
+  try {
+    const incident = await Incident.findByIdAndUpdate(
+      req.params.id,
+      {
+        status: req.body.status,
+      },
+      {
+  returnDocument: "after",
+}
+    );
+
+    if (!incident) {
+      return res.status(404).json({
+        message: "Incident not found",
+      });
+    }
+
+    // 🔥 NEW
+    const io = req.app.get("io");
+    io.emit("statusUpdated", incident);
+
+    res.status(200).json(incident);
   } catch (error) {
     next(error);
   }
