@@ -1,12 +1,14 @@
-import MapView from "../components/MapView";
-import { useState, useEffect } from "react";
-
 import { io } from "socket.io-client";
+import MapView from "../components/MapView";
+import { useEffect, useState, useRef } from "react";
+
+
 
 import API from "../services/api";
 
 
 function Dashboard() {
+  const socketRef = useRef(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
@@ -85,25 +87,26 @@ const lowCount = incidents.filter(
 useEffect(() => {
   const socket = io("http://localhost:5000");
 
+  socket.on("connect", () => {
+    console.log("Socket Connected:", socket.id);
+  });
+
   socket.on("newIncident", (incident) => {
     console.log("New Incident Received:", incident);
 
     setIncidents((prev) => [incident, ...prev]);
   });
 
-
-socket.on("sosAlert", (incident) => {
-  alert(
-    `🚨 EMERGENCY ALERT!\n\n${incident.title}\n${incident.description}`
-  );
-});
-
+  socket.on("sosAlert", (incident) => {
+    alert(
+      `🚨 EMERGENCY ALERT!\n\n${incident.title}\n${incident.description}`
+    );
+  });
 
   return () => {
     socket.disconnect();
   };
 }, []);
-
 
 
  const handleSubmit = async () => {
