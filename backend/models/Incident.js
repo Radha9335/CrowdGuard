@@ -40,6 +40,12 @@ const incidentSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+
+aiAnalysis: {
+  type: String,
+  default: "",
+},
+
   },
   { timestamps: true }
 );

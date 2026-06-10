@@ -66,16 +66,17 @@ function MapView({ incidents }) {
   return (
     <MapContainer
       center={[28.6139, 77.2090]}
-      zoom={10}
+      zoom={12}
       style={{
-        height: "400px",
-        width: "80%",
-        margin: "20px auto",
-      }}
+  height: "550px",
+  width: "95%",
+  margin: "20px auto",
+  borderRadius: "15px",
+}}
     >
       <TileLayer
         attribution="&copy; OpenStreetMap contributors"
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
       />
 
       {markers.map((incident) => (

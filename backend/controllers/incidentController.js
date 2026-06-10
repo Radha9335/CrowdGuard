@@ -1,12 +1,32 @@
 const Incident = require("../models/Incident");
 
+const {
+  analyzeIncident,
+} = require("../services/geminiService");
+
 // 🔹 Create Incident
 exports.createIncident = async (req, res, next) => {
   try {
-    const incident = new Incident({
+    let aiAnalysis = "";
+
+try {
+  aiAnalysis = await analyzeIncident(
+    req.body.title,
+    req.body.description,
+    req.body.location
+  );
+
+  console.log("AI Analysis:", aiAnalysis);
+} catch (error) {
+  console.log("GEMINI ERROR:");
+  console.log(error);
+}
+
+const incident = new Incident({
   ...req.body,
   image: req.file ? req.file.filename : "",
   user: req.user.id,
+  aiAnalysis,
 });
     const savedIncident = await incident.save();
 
