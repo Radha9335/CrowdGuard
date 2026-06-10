@@ -29,8 +29,13 @@ router.get("/", getIncidents);
 router.delete("/:id", protect, deleteIncident);
 
 // Update
-router.put("/:id", updateIncident);
+router.put("/:id", protect, updateIncident);
 
-router.put("/:id/status", updateIncidentStatus);
+router.put(
+  "/:id/status",
+  protect,
+  adminOnly,
+  updateIncidentStatus
+);
 
 module.exports = router;

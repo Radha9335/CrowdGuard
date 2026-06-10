@@ -17,6 +17,14 @@ function Login() {
     localStorage.setItem("token", response.data.token);
 localStorage.setItem("userName", response.data.user.name);
 
+localStorage.setItem("role", response.data.user.role);
+
+
+localStorage.setItem(
+  "userId",
+  response.data.user.id
+);
+
 console.log(response.data);
 
 alert("Login Successful!");

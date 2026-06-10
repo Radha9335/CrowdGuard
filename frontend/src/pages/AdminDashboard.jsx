@@ -56,6 +56,16 @@ const updateStatus = async (
   }
 };
 
+const deleteIncident = async (id) => {
+  try {
+    await API.delete(`/incidents/${id}`);
+
+    fetchIncidents();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
   if (!stats) {
     return <h2>Loading...</h2>;
   }
@@ -96,6 +106,40 @@ const updateStatus = async (
           <h3>Low</h3>
           <p>{stats.lowSeverity}</p>
         </div>
+
+<div style={{ border: "2px solid cyan", padding: "20px" }}>
+  <h3>Verified</h3>
+  <p>
+    {
+      incidents.filter(
+        (incident) => incident.status === "Verified"
+      ).length
+    }
+  </p>
+</div>
+
+<div style={{ border: "2px solid yellow", padding: "20px" }}>
+  <h3>Pending</h3>
+  <p>
+    {
+      incidents.filter(
+        (incident) => incident.status === "Pending"
+      ).length
+    }
+  </p>
+</div>
+
+<div style={{ border: "2px solid blue", padding: "20px" }}>
+  <h3>Resolved</h3>
+  <p>
+    {
+      incidents.filter(
+        (incident) => incident.status === "Resolved"
+      ).length
+    }
+  </p>
+</div>
+
             </div>
 
       <h2 style={{ marginTop: "40px" }}>
@@ -168,6 +212,30 @@ const updateStatus = async (
 >
   Resolve
 </button>
+
+<button
+  onClick={() => {
+    const confirmDelete =
+      window.confirm(
+        "Delete this incident?"
+      );
+
+    if (confirmDelete) {
+      deleteIncident(incident._id);
+    }
+  }}
+  style={{
+    marginLeft: "10px",
+    backgroundColor: "red",
+    color: "white",
+    border: "none",
+    padding: "8px 12px",
+    cursor: "pointer",
+  }}
+>
+  Delete
+</button>
+
         </div>
       ))}
     </div>

@@ -17,12 +17,36 @@ function Home() {
         Report Incident
       </button>
 
+
+
+
       <button
         style={{ marginLeft: "10px" }}
         onClick={() => navigate("/dashboard")}
       >
         SOS
       </button>
+
+
+
+
+      <br /><br />
+
+<button
+  onClick={() => navigate("/login")}
+>
+  Login
+</button>
+
+<button
+  onClick={() => navigate("/register")}
+  style={{ marginLeft: "10px" }}
+>
+  Register
+</button>
+
+
+
     </div>
   );
 }

@@ -15,6 +15,7 @@ function Dashboard() {
   const [severity, setSeverity] = useState("Low");
   const [image, setImage] = useState(null);
   const [sosAlert, setSosAlert] = useState(null);
+  const [notifications, setNotifications] = useState([]);
   const handleSOS = async () => {
   try {
     await API.post(
@@ -93,10 +94,18 @@ useEffect(() => {
   });
 
   socket.on("newIncident", (incident) => {
-    console.log("New Incident Received:", incident);
+  console.log("New Incident Received:", incident);
 
-    setIncidents((prev) => [incident, ...prev]);
-  });
+  setIncidents((prev) => [incident, ...prev]);
+
+  setNotifications((prev) => [
+    {
+      id: Date.now(),
+      message: `New Incident: ${incident.title}`,
+    },
+    ...prev,
+  ]);
+});
 
 
 
@@ -110,13 +119,30 @@ useEffect(() => {
         : incident
     )
   );
+
+setNotifications((prev) => [
+  {
+    id: Date.now(),
+    message: `${updatedIncident.title} marked as ${updatedIncident.status}`,
+  },
+  ...prev,
+]);
+
 });
 
-  socket.on("sosAlert", (incident) => {
-    alert(
-      `🚨 EMERGENCY ALERT!\n\n${incident.title}\n${incident.description}`
-    );
-  });
+ socket.on("sosAlert", (incident) => {
+  alert(
+    `🚨 EMERGENCY ALERT!\n\n${incident.title}\n${incident.description}`
+  );
+
+  setNotifications((prev) => [
+    {
+      id: Date.now(),
+      message: `🚨 SOS ALERT: ${incident.title}`,
+    },
+    ...prev,
+  ]);
+});
 
   return () => {
     socket.disconnect();
@@ -241,6 +267,31 @@ await API.post(
     Welcome, {localStorage.getItem("userName")}
   </span>
 
+<div
+  style={{
+    position: "relative",
+    cursor: "pointer",
+  }}
+>
+  🔔
+
+  <span
+    style={{
+      position: "absolute",
+      top: "-10px",
+      right: "-10px",
+      background: "red",
+      color: "white",
+      borderRadius: "50%",
+      padding: "2px 6px",
+      fontSize: "12px",
+    }}
+  >
+    {notifications.length}
+  </span>
+</div>
+
+
   <button
     onClick={() => {
       localStorage.clear();
@@ -260,6 +311,26 @@ await API.post(
 </div>
 </div>
 
+<div
+  style={{
+    background: "#111827",
+    padding: "15px",
+    marginBottom: "20px",
+    borderRadius: "10px",
+  }}
+>
+  <h3>🔔 Notifications</h3>
+
+  {notifications.length === 0 ? (
+    <p>No notifications yet</p>
+  ) : (
+    notifications.map((notification) => (
+      <p key={notification.id}>
+        {notification.message}
+      </p>
+    ))
+  )}
+</div>
 
 
       <h1>Report Incident</h1>
@@ -494,28 +565,30 @@ await API.post(
   </span>
 </p>
 
-<select
-  value={incident.status || "Pending"}
-  onChange={async (e) => {
-    try {
-      await API.put(
-        `/incidents/${incident._id}/status`,
-        {
-          status: e.target.value,
-        }
-      );
+{localStorage.getItem("role") === "admin" && (
+  <select
+    value={incident.status || "Pending"}
+    onChange={async (e) => {
+      try {
+        await API.put(
+          `/incidents/${incident._id}/status`,
+          {
+            status: e.target.value,
+          }
+        );
 
-      fetchIncidents();
-    } catch (error) {
-      console.log(error);
-      alert("Status Update Failed");
-    }
-  }}
->
-  <option value="Pending">Pending</option>
-  <option value="Verified">Verified</option>
-  <option value="Resolved">Resolved</option>
-</select>
+        fetchIncidents();
+      } catch (error) {
+        console.log(error);
+        alert("Status Update Failed");
+      }
+    }}
+  >
+    <option value="Pending">Pending</option>
+    <option value="Verified">Verified</option>
+    <option value="Resolved">Resolved</option>
+  </select>
+)}
 
           <p>
             <strong>Reported By:</strong>{" "}
@@ -527,42 +600,44 @@ await API.post(
             {new Date(incident.createdAt).toLocaleString()}
 </p>
 
-          <button
-  onClick={() => {
-    setTitle(incident.title);
-    setDescription(incident.description);
-    setLocation(incident.location);
-    setSeverity(incident.severity);
+          {incident.user?._id === localStorage.getItem("userId") && (
+  <button
+    onClick={() => {
+      setTitle(incident.title);
+      setDescription(incident.description);
+      setLocation(incident.location);
+      setSeverity(incident.severity);
 
-    localStorage.setItem("editId", incident._id);
-  }}
->
-  Edit
-</button>
+      localStorage.setItem("editId", incident._id);
+    }}
+  >
+    Edit
+  </button>
+)}
 
 
 
+          {incident.user?._id === localStorage.getItem("userId") && (
+  <button
+    onClick={async () => {
+      try {
+        await API.delete(`/incidents/${incident._id}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
 
-          <button
-  onClick={async () => {
-    try {
-      await API.delete(`/incidents/${incident._id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
-      alert("Incident Deleted");
-      fetchIncidents();
-    } catch (error) {
-      console.log(error);
-      alert("Delete Failed");
-    }
-  }}
->
-  Delete
-</button>
-
+        alert("Incident Deleted");
+        fetchIncidents();
+      } catch (error) {
+        console.log(error);
+        alert("Delete Failed");
+      }
+    }}
+  >
+    Delete
+  </button>
+)}
                 </div>
       ))}
     </div>

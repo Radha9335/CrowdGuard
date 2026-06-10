@@ -69,6 +69,27 @@ exports.getIncidents = async (req, res, next) => {
 // 🔹 Delete Incident
 exports.deleteIncident = async (req, res, next) => {
   try {
+
+
+    const incident = await Incident.findById(req.params.id);
+
+if (!incident) {
+  return res.status(404).json({
+    message: "Incident not found",
+  });
+}
+
+if (
+  incident.user.toString() !== req.user.id &&
+  req.user.role !== "admin"
+) {
+  return res.status(403).json({
+    message: "Not authorized",
+  });
+}
+
+
+
     const deleted = await Incident.findByIdAndDelete(req.params.id);
 
     if (!deleted) {
@@ -87,6 +108,27 @@ exports.deleteIncident = async (req, res, next) => {
 // 🔹 Update Incident
 exports.updateIncident = async (req, res, next) => {
   try {
+
+
+const incident = await Incident.findById(req.params.id);
+
+if (!incident) {
+  return res.status(404).json({
+    message: "Incident not found",
+  });
+}
+
+if (
+  incident.user.toString() !== req.user.id &&
+  req.user.role !== "admin"
+) {
+  return res.status(403).json({
+    message: "Not authorized",
+  });
+}
+
+
+
     const updated = await Incident.findByIdAndUpdate(
       req.params.id,
       req.body,
