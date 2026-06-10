@@ -412,14 +412,11 @@ await API.post(
       <br />
       <br />
 
-      <select
-        value={severity}
-        onChange={(e) => setSeverity(e.target.value)}
-      >
-        <option value="Low">Low</option>
-        <option value="Medium">Medium</option>
-        <option value="High">High</option>
-      </select>
+      <select value={severity} disabled>
+  <option value="Low">Low</option>
+  <option value="Medium">Medium</option>
+  <option value="High">High</option>
+</select>
 
       <br />
       <br />
@@ -599,6 +596,35 @@ await API.post(
             <strong>Reported On:</strong>{" "}
             {new Date(incident.createdAt).toLocaleString()}
 </p>
+
+
+{incident.aiAnalysis && (
+  <div
+    style={{
+      marginTop: "15px",
+      padding: "12px",
+      background: "#1f2937",
+      borderRadius: "8px",
+      border: "1px solid #374151",
+    }}
+  >
+    <h4 style={{ color: "#60a5fa" }}>
+      🤖 AI Analysis
+    </h4>
+
+    <pre
+      style={{
+        whiteSpace: "pre-wrap",
+        color: "#e5e7eb",
+      }}
+    >
+      {incident.aiAnalysis}
+    </pre>
+  </div>
+)}
+
+
+
 
           {incident.user?._id === localStorage.getItem("userId") && (
   <button

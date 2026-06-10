@@ -2,33 +2,48 @@ const Incident = require("../models/Incident");
 
 const {
   analyzeIncident,
-} = require("../services/geminiService");
-
+} = require("../services/openRouterService");
 // 🔹 Create Incident
 exports.createIncident = async (req, res, next) => {
   try {
+
     let aiAnalysis = "";
+    let aiSeverity = "Low";
 
-try {
-  aiAnalysis = await analyzeIncident(
-    req.body.title,
-    req.body.description,
-    req.body.location
-  );
+    try {
+      aiAnalysis = await analyzeIncident(
+        req.body.title,
+        req.body.description,
+        req.body.location
+      );
 
-  console.log("AI Analysis:", aiAnalysis);
-} catch (error) {
-  console.log("GEMINI ERROR:");
-  console.log(error);
-}
+      console.log("AI Analysis:", aiAnalysis);
 
-const incident = new Incident({
-  ...req.body,
-  image: req.file ? req.file.filename : "",
-  user: req.user.id,
-  aiAnalysis,
-});
+      if (aiAnalysis.includes("SEVERITY: High")) {
+        aiSeverity = "High";
+      }
+      else if (
+        aiAnalysis.includes("SEVERITY: Medium")
+      ) {
+        aiSeverity = "Medium";
+      }
+
+    } catch (error) {
+      console.log("AI ERROR:");
+      console.log(error);
+    }
+
+    const incident = new Incident({
+      ...req.body,
+      severity: aiSeverity,
+      image: req.file ? req.file.filename : "",
+      user: req.user.id,
+      aiAnalysis,
+    });
+
     const savedIncident = await incident.save();
+
+    // rest of your code...
 
 const io = req.app.get("io");
 

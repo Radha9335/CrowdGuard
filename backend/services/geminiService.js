@@ -1,8 +1,10 @@
-const analyzeIncident = async (
-  title,
-  description,
-  location
-) => {
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+const analyzeIncident = async (title, description, location) => {
   try {
     const prompt = `
 You are an emergency incident analyst.
@@ -26,8 +28,7 @@ Analyze this incident and provide:
 Keep answer short.
 `;
 
-    const result =
-      await model.generateContent(prompt);
+    const result = await model.generateContent(prompt);
 
     return result.response.text();
 
@@ -36,14 +37,16 @@ Keep answer short.
     console.log(error);
 
     return `
-Incident Category: Fire
+Incident Category: Unknown
 
-Severity Score: 9
+Severity Score: 5
 
 Recommended Action:
-Dispatch emergency services immediately.
+Please review this incident manually.
 
-Likely Emergency: Yes
+Likely Emergency: Unknown
 `;
   }
 };
+
+module.exports = { analyzeIncident };
