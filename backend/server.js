@@ -3,6 +3,10 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 
+const aiRoutes =
+  require("./routes/aiRoutes");
+
+
 const http = require("http");
 
 const { Server } = require("socket.io");
@@ -47,6 +51,9 @@ app.use("/uploads", express.static("uploads"));
 
 // 🔹 Routes
 app.use("/api/incidents", incidentRoutes);
+
+app.use("/api/ai", aiRoutes);
+
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);   // ✅ ADD THIS
 

@@ -22,6 +22,8 @@ const analyzeIncident = async (
         {
           role: "user",
           content: `
+You are an AI Emergency Response System.
+
 Incident Title:
 ${title}
 
@@ -31,31 +33,22 @@ ${description}
 Location:
 ${location}
 
-Analyze this incident.
+Return ONLY in this format:
 
-Return EXACTLY in this format:
+CATEGORY: <category>
 
-SEVERITY: Low
+SEVERITY: <Low/Medium/High>
 
-or
+EMERGENCY_LEVEL: <Normal/Warning/Critical>
 
-SEVERITY: Medium
+PRIORITY: <Low/Medium/Immediate>
 
-or
+ACTIONS:
+- action 1
+- action 2
+- action 3
 
-SEVERITY: High
-
-Then write:
-
-ANALYSIS:
-<your analysis>
-
-Rules:
-
-- Fire, violence, medical emergency, trapped people = High
-- Traffic accident with injuries = Medium
-- Minor issues = Low
-- Keep analysis under 100 words.
+Keep it concise.
 `,
         },
       ],

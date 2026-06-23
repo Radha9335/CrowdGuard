@@ -33,13 +33,25 @@ exports.createIncident = async (req, res, next) => {
       console.log(error);
     }
 
-    const incident = new Incident({
-      ...req.body,
-      severity: aiSeverity,
-      image: req.file ? req.file.filename : "",
-      user: req.user.id,
-      aiAnalysis,
-    });
+    let autoStatus = "Pending";
+
+if (
+  aiAnalysis.includes(
+    "EMERGENCY_LEVEL: Critical"
+  )
+) {
+  aiSeverity = "High";
+  autoStatus = "Verified";
+}
+
+const incident = new Incident({
+  ...req.body,
+  severity: aiSeverity,
+  status: autoStatus,
+  image: req.file ? req.file.filename : "",
+  user: req.user.id,
+  aiAnalysis,
+});
 
     const savedIncident = await incident.save();
 
@@ -48,6 +60,19 @@ exports.createIncident = async (req, res, next) => {
 const io = req.app.get("io");
 
 io.emit("newIncident", savedIncident);
+
+if (
+  savedIncident.aiAnalysis.includes(
+    "EMERGENCY_LEVEL: Critical"
+  )
+) {
+  io.emit("sosAlert", {
+    title: savedIncident.title,
+    location: savedIncident.location,
+    severity: savedIncident.severity,
+  });
+}
+
 
 if (
   savedIncident.title === "SOS Emergency" ||

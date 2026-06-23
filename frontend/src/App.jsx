@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-
+import AIChat from "./pages/AIChat";
 import AdminRoute from "./components/AdminRoute";
 
 import Register from "./pages/Register";
@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Home from "./pages/Home";
 import AdminDashboard from "./pages/AdminDashboard";
+import Profile from "./pages/Profile";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -24,6 +25,16 @@ function App() {
     </ProtectedRoute>
   }
 />
+
+    <Route
+  path="/ai-chat"
+  element={<AIChat />}
+/>
+
+
+
+
+
         <Route
   path="/admin"
   element={
