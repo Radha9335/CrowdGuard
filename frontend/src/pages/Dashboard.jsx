@@ -17,21 +17,23 @@ function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  // Calculate Statistics
   const totalIncidents = incidents.length;
   const highCount = incidents.filter((i) => i.severity === "High").length;
   const mediumCount = incidents.filter((i) => i.severity === "Medium").length;
   const lowCount = incidents.filter((i) => i.severity === "Low").length;
 
-  // Fetch Incidents
+  // ONE fetchIncidents function (merged from your two duplicates)
   const fetchIncidents = async () => {
     try {
       setLoading(true);
       const response = await API.get(
-        `/incidents?search=${search}&severity=${filterSeverity}`
+        `/incidents?page=${page}&limit=5&search=${search}&severity=${filterSeverity}`
       );
       setIncidents(response.data.data);
+      setTotalPages(response.data.pages);
     } catch (error) {
       console.log(error);
       setError("Failed to fetch incidents");
@@ -40,6 +42,16 @@ function Dashboard() {
     }
   };
 
+  useEffect(() => {
+    setPage(1);
+    fetchIncidents();
+  }, [search, filterSeverity]);
+
+  useEffect(() => {
+    fetchIncidents();
+  }, [page]);
+
+  // ... rest of your component stays exactly the same
   // Handle SOS
   const handleSOS = async () => {
     try {
