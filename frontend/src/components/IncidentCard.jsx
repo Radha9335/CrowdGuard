@@ -1,3 +1,5 @@
+import { SERVER_URL } from "../services/api";
+
 function IncidentCard({ incident, onEdit, onDelete, currentUserId, isAdmin }) {
   return (
     <div
@@ -47,7 +49,7 @@ function IncidentCard({ incident, onEdit, onDelete, currentUserId, isAdmin }) {
       {/* Image */}
       {incident.image && (
         <img
-          src={`http://localhost:5000/uploads/${incident.image}`}
+          src={`${SERVER_URL}/uploads/${incident.image}`}
           alt="Incident"
           className="w-full h-48 object-cover rounded-lg mb-4"
         />

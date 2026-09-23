@@ -3,7 +3,7 @@ import MapView from "../components/MapView";
 import ChatBot from "../components/ChatBot";
 import IncidentCharts from "../components/IncidentCharts";
 import { useEffect, useState, useRef } from "react";
-import API from "../services/api";
+import API, { SERVER_URL } from "../services/api";
 
 function Dashboard() {
   const socketRef = useRef(null);
@@ -219,7 +219,7 @@ function Dashboard() {
   };
 
   useEffect(() => {
-    const socket = io("http://localhost:5000");
+    const socket = io(SERVER_URL);
     socket.on("connect", () => console.log("🟢 Socket Connected:", socket.id));
     socket.on("newIncident", (incident) => {
       setIncidents((prev) => [incident, ...prev]);
@@ -291,7 +291,7 @@ function Dashboard() {
       </div>
 
       {incident.image && (
-        <img src={`http://localhost:5000/uploads/${incident.image}`} alt="Incident" className="w-full h-48 object-cover rounded-lg mb-4" />
+        <img src={`${SERVER_URL}/uploads/${incident.image}`} alt="Incident" className="w-full h-48 object-cover rounded-lg mb-4" />
       )}
 
       <p className="text-slate-300 mb-4">{incident.description}</p>

@@ -1,7 +1,13 @@
 import axios from "axios";
 
+export const SERVER_URL =
+  import.meta.env.VITE_SERVER_URL || "https://crowdguard-backend-py82.onrender.com";
+
+export const API_URL =
+  import.meta.env.VITE_API_URL || `${SERVER_URL}/api`;
+
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
+  baseURL: API_URL,
 });
 
 API.interceptors.request.use((config) => {

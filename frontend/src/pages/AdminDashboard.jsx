@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import API from "../services/api";
+import API, { SERVER_URL } from "../services/api";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   LineChart, Line, PieChart, Pie, Cell, Legend
@@ -519,7 +519,7 @@ function AdminDashboard() {
                   </div>
 
                   {incident.image && (
-                    <img src={`http://localhost:5000/uploads/${incident.image}`} alt="Incident" className="w-full h-48 object-cover rounded-lg mb-4" />
+                    <img src={`${SERVER_URL}/uploads/${incident.image}`} alt="Incident" className="w-full h-48 object-cover rounded-lg mb-4" />
                   )}
 
                   <p className="text-slate-300 mb-4">{incident.description}</p>
