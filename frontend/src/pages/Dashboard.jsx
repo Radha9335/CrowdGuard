@@ -13,6 +13,7 @@ function Dashboard() {
   const [severity, setSeverity] = useState("Low");
   const [image, setImage] = useState(null);
   const [incidents, setIncidents] = useState([]);
+  const [allIncidents, setAllIncidents] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [search, setSearch] = useState("");
   const [filterSeverity, setFilterSeverity] = useState("");
@@ -29,19 +30,24 @@ function Dashboard() {
 
   const currentUserId = localStorage.getItem("userId");
 
-  const totalIncidents = incidents.length;
-  const highCount = incidents.filter((i) => i.severity === "High").length;
-  const mediumCount = incidents.filter((i) => i.severity === "Medium").length;
-  const lowCount = incidents.filter((i) => i.severity === "Low").length;
+  const dataSource = allIncidents.length > 0 ? allIncidents : incidents;
+  const totalIncidents = dataSource.length;
+  const highCount = dataSource.filter((i) => i.severity === "High").length;
+  const mediumCount = dataSource.filter((i) => i.severity === "Medium").length;
+  const lowCount = dataSource.filter((i) => i.severity === "Low").length;
 
   const fetchIncidents = async () => {
     try {
       setLoading(true);
-      const response = await API.get(
-        `/incidents?page=${page}&limit=5&search=${search}&severity=${filterSeverity}`
-      );
+      const [response, allResponse] = await Promise.all([
+        API.get(`/incidents?page=${page}&limit=5&search=${search}&severity=${filterSeverity}`),
+        API.get(`/incidents?limit=1000`)
+      ]);
       setIncidents(response.data.data);
       setTotalPages(response.data.pages);
+      if (allResponse.data && allResponse.data.data) {
+        setAllIncidents(allResponse.data.data);
+      }
     } catch (error) {
       console.log(error);
       setError("Failed to fetch incidents");
@@ -555,7 +561,7 @@ function Dashboard() {
           </div>
         </div>
 
-        <IncidentCharts incidents={incidents} />
+        <IncidentCharts incidents={dataSource} />
 
         <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 mb-8">
           <h3 className="text-lg font-bold text-white mb-4">🔍 Search & Filter</h3>
@@ -582,7 +588,7 @@ function Dashboard() {
 
         <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 mb-8">
           <h3 className="text-lg font-bold text-white mb-4">🗺️ Incident Map</h3>
-          <MapView incidents={incidents} />
+          <MapView incidents={dataSource} />
         </div>
 
         <div className="flex gap-3 mb-6">

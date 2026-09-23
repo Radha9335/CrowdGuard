@@ -42,11 +42,11 @@ function ClusterLayer({ markers }) {
 
       const marker = L.marker([incident.lat, incident.lon], { icon });
       marker.bindPopup(`
-        <div style="min-width:160px">
-          <strong>${incident.title}</strong><br/>
-          📍 ${incident.location}<br/>
-          ⚠️ Severity: <b>${incident.severity}</b><br/>
-          🔖 Status: ${incident.status}
+        <div style="min-width:160px; color:#1e293b">
+          <strong style="font-size:14px">${incident.title}</strong><br/>
+          📍 <b>Location:</b> ${incident.location}<br/>
+          ⚠️ <b>Severity:</b> <span style="color:${incident.severity === 'High' ? 'red' : incident.severity === 'Medium' ? 'orange' : 'green'}">${incident.severity}</span><br/>
+          🔖 <b>Status:</b> ${incident.status}
         </div>
       `);
       clusterGroup.addLayer(marker);
@@ -93,13 +93,30 @@ function MapView({ incidents }) {
   const [filterStatus, setFilterStatus] = useState("All");
   const [viewMode, setViewMode] = useState("cluster"); // "cluster" | "heat"
 
-  // Geocode incidents
+  // Geocode incidents with fallback support
   useEffect(() => {
-    if (!incidents.length) return;
+    if (!incidents || !incidents.length) {
+      setMarkers([]);
+      return;
+    }
 
     const getCoordinates = async () => {
       const results = [];
       for (const incident of incidents) {
+        if (!incident.location) continue;
+
+        // Try direct lat,lon parsing first (e.g. "28.6139, 77.2090")
+        const parts = incident.location.split(",").map((s) => parseFloat(s.trim()));
+        if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1]) && parts[0] >= -90 && parts[0] <= 90) {
+          results.push({
+            ...incident,
+            lat: parts[0],
+            lon: parts[1],
+          });
+          continue;
+        }
+
+        // Search Nominatim API
         try {
           const response = await axios.get(
             `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(incident.location)}&format=json&limit=1`
@@ -110,9 +127,21 @@ function MapView({ incidents }) {
               lat: parseFloat(response.data[0].lat),
               lon: parseFloat(response.data[0].lon),
             });
+          } else {
+            // Fallback default coordinate for un-geocoded location (Delhi/NCR region)
+            results.push({
+              ...incident,
+              lat: 28.6139 + (Math.random() - 0.5) * 0.05,
+              lon: 77.2090 + (Math.random() - 0.5) * 0.05,
+            });
           }
-        } catch (error) {
-          console.log(error);
+        } catch {
+          // Fallback if rate limited
+          results.push({
+            ...incident,
+            lat: 28.6139 + (Math.random() - 0.5) * 0.05,
+            lon: 77.2090 + (Math.random() - 0.5) * 0.05,
+          });
         }
       }
       setMarkers(results);
@@ -197,12 +226,12 @@ function MapView({ incidents }) {
       {/* Map */}
       <MapContainer
         center={[28.6139, 77.2090]}
-        zoom={12}
+        zoom={11}
         style={{ height: "550px", width: "100%", borderRadius: "12px" }}
       >
         <TileLayer
-          attribution="&copy; OpenStreetMap contributors"
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
         {viewMode === "cluster" && <ClusterLayer markers={filteredMarkers} />}

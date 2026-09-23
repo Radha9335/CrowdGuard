@@ -6,6 +6,7 @@ exports.createIncident = async (req, res, next) => {
   try {
     let aiAnalysis = "";
     let aiSeverity = "Low";
+    let autoStatus = "Pending";
 
     try {
       aiAnalysis = await analyzeIncident(
@@ -14,19 +15,39 @@ exports.createIncident = async (req, res, next) => {
         req.body.location
       );
 
-      if (aiAnalysis.includes("SEVERITY: High")) {
+      const upper = (aiAnalysis || "").toUpperCase();
+
+      if (
+        upper.includes("SEVERITY: HIGH") ||
+        upper.includes("SEVERITY: 8") ||
+        upper.includes("SEVERITY: 9") ||
+        upper.includes("SEVERITY: 10") ||
+        /fire|accident|explosion|critical|emergency|fight/i.test(req.body.title || "")
+      ) {
         aiSeverity = "High";
-      } else if (aiAnalysis.includes("SEVERITY: Medium")) {
+      } else if (
+        upper.includes("SEVERITY: MEDIUM") ||
+        upper.includes("SEVERITY: 5") ||
+        upper.includes("SEVERITY: 6") ||
+        upper.includes("SEVERITY: 7") ||
+        /warning|moderate/i.test(req.body.title || "")
+      ) {
         aiSeverity = "Medium";
+      } else if (req.body.severity) {
+        aiSeverity = req.body.severity;
+      }
+
+      if (
+        upper.includes("EMERGENCY_LEVEL: CRITICAL") ||
+        upper.includes("EMERGENCY: YES") ||
+        upper.includes("IMMEDIATE") ||
+        aiSeverity === "High" ||
+        (req.body.title && req.body.title.includes("SOS"))
+      ) {
+        autoStatus = "Verified";
       }
     } catch (error) {
       console.log("AI ERROR:", error);
-    }
-
-    let autoStatus = "Pending";
-    if (aiAnalysis.includes("EMERGENCY_LEVEL: Critical")) {
-      aiSeverity = "High";
-      autoStatus = "Verified";
     }
 
     const incident = new Incident({

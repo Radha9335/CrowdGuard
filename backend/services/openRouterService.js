@@ -5,23 +5,14 @@ const client = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
 });
 
-const analyzeIncident = async (
-  title,
-  description,
-  location
-) => {
-  const completion =
-    await client.chat.completions.create({
-      model: "openai/gpt-oss-20b:free",
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are an emergency incident analyst.",
-        },
-        {
-          role: "user",
-          content: `
+const MODELS = [
+  "nex-agi/nex-n2.5-mini:free",
+  "liquid/lfm-2.5-2.6b:free",
+  "qwen/qwen3.8-27b:free",
+];
+
+const analyzeIncident = async (title, description, location) => {
+  const prompt = `
 You are an AI Emergency Response System.
 
 Incident Title:
@@ -49,15 +40,46 @@ ACTIONS:
 - action 3
 
 Keep it concise.
-`,
-        },
-      ],
-    });
+`;
 
-  const aiResponse =
-  completion.choices[0].message.content;
+  for (const model of MODELS) {
+    try {
+      const completion = await client.chat.completions.create({
+        model,
+        messages: [
+          {
+            role: "system",
+            content: "You are an emergency incident analyst.",
+          },
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+      });
 
-return aiResponse;
+      const aiResponse = completion.choices[0].message.content;
+      if (aiResponse) return aiResponse;
+    } catch (err) {
+      console.log(`OpenRouter model ${model} failed:`, err.message);
+    }
+  }
+
+  // Fallback response if all AI models fail
+  return `
+CATEGORY: General Incident
+
+SEVERITY: Medium
+
+EMERGENCY_LEVEL: Warning
+
+PRIORITY: Medium
+
+ACTIONS:
+- Review incident details manually
+- Notify local emergency response team if urgent
+- Verify location and report status
+`;
 };
 
 module.exports = {
