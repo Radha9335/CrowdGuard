@@ -51,7 +51,12 @@ app.set("io", io);
 
 // ── Middlewares ──────────────────────────────────────────────────
 app.use(express.json());
-app.use("/uploads", express.static("uploads"));
+
+const uploadPath = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadPath)) {
+  fs.mkdirSync(uploadPath, { recursive: true });
+}
+app.use("/uploads", express.static(uploadPath));
 
 // ── Routes ──────────────────────────────────────────────────────
 app.use("/api/incidents", incidentRoutes);

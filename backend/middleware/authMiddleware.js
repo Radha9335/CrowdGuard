@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET || "crowdguard_secret_key";
 
 // 🔐 Protect Middleware
 const protect = (req, res, next) => {
