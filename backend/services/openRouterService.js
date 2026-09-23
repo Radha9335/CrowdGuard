@@ -1,9 +1,11 @@
 const OpenAI = require("openai");
 
-const client = new OpenAI({
-  apiKey: process.env.OPENROUTER_API_KEY,
-  baseURL: "https://openrouter.ai/api/v1",
-});
+const getClient = () => {
+  return new OpenAI({
+    apiKey: process.env.OPENROUTER_API_KEY || "dummy_key",
+    baseURL: "https://openrouter.ai/api/v1",
+  });
+};
 
 const MODELS = [
   "nex-agi/nex-n2.5-mini:free",
@@ -44,7 +46,7 @@ Keep it concise.
 
   for (const model of MODELS) {
     try {
-      const completion = await client.chat.completions.create({
+      const completion = await getClient().chat.completions.create({
         model,
         messages: [
           {

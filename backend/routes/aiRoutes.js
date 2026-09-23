@@ -5,10 +5,12 @@ const OpenAI = require("openai");
 
 const router = express.Router();
 
-const openAIClient = new OpenAI({
-  apiKey: process.env.OPENROUTER_API_KEY,
-  baseURL: "https://openrouter.ai/api/v1",
-});
+const getOpenAIClient = () => {
+  return new OpenAI({
+    apiKey: process.env.OPENROUTER_API_KEY || "dummy_key",
+    baseURL: "https://openrouter.ai/api/v1",
+  });
+};
 
 const OPENROUTER_MODELS = [
   "nex-agi/nex-n2.5-mini:free",
@@ -54,7 +56,8 @@ If the question is unrelated to incidents, politely redirect.
 
     // Try Gemini AI first
     try {
-      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+      const apiKey = process.env.GEMINI_API_KEY || "dummy_key";
+      const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({ model: "gemini-3.6-flash" });
       const result = await model.generateContent(prompt);
       const answer = result.response.text();
@@ -66,7 +69,8 @@ If the question is unrelated to incidents, politely redirect.
     // Fallback to OpenRouter
     for (const model of OPENROUTER_MODELS) {
       try {
-        const completion = await openAIClient.chat.completions.create({
+        const client = getOpenAIClient();
+        const completion = await client.chat.completions.create({
           model,
           messages: [{ role: "user", content: prompt }],
         });
